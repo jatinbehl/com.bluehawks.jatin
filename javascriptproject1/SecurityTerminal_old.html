@@ -1,0 +1,243 @@
+<html>
+   <body onload="initialize()">
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+      <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+      <script>
+         var serverResponse = "no response yet";
+         var locations=[{"latitude":"43.7740","longitude":"-79.5052","name":"jatin","age":"jb@gamil.com"}];
+         var oldLocations=[];
+         var oldLocations_info=[];
+         var infoResponse = "no info response yet"
+         
+         //query the server for the latest data 
+         setInterval(function(){ get_data_from_server()},1000);
+         
+         //clean the do not plot this array
+         setInterval(function(){ clean_do_not_plot_this()},5000);
+         
+          //query the server for the latest data 
+         setInterval(function(){ get_info_from_server()},1000);
+         
+         //clean the do not plot this array
+         setInterval(function(){ clean_do_not_plot_this()},5000);
+         
+         var markers;
+         var plotThis=[];
+         var plotThis_info=[];
+         var doNotPlotThis=[];
+         var doNotPlotThis_info=[];
+         //cleans the doNotPlotThis array, so that requests can show up again
+         function clean_do_not_plot_this(){ 
+          for (var i = 0; i < doNotPlotThis.length; i++) {
+                 var entity = doNotPlotThis[i];
+                 removeObject(oldLocations, entity);
+                 removeObject(plotThis, entity);
+                 }
+         doNotPlotThis=[];
+         }
+         
+         function clean_do_not_plot_this_info(){ 
+          for (var i = 0; i < doNotPlotThis_info.length; i++) {
+                 var entity = doNotPlotThis_info[i];
+                 removeObject(oldLocations_info, entity);
+                 removeObject(plotThis_info, entity);
+                 }
+         doNotPlotThis_info=[];
+         }
+                  
+         function get_data_from_server()
+         {
+         	var texta = get_server_response();
+         	locations = JSON.parse(serverResponse);
+         	plotThis=[];
+         	console.log("initial " + plotThis.length);
+         	 for (var i = 0; i < locations.length; i++) {
+                 var entity = locations[i];
+                 if(!contains(oldLocations, entity)){
+                 		plotThis.push(entity);
+                 		console.log("new " + plotThis.length);
+                 		oldLocations.push(entity);
+                 	}
+                 }
+         	drop();
+          	console.log("" + serverResponse);
+         }
+   
+           function get_info_from_server()
+         {
+         	var infodata = JSON.parse(infoResponse);
+         	plotThis_info=[];
+         	console.log("initial info length" + plotThis_info.length);
+         	 for (var i = 0; i < infodata.length; i++) {
+                 var entity = infodata[i]; //check here
+                 if(!contains(oldLocations_info, entity)){
+                 		plotThis_info.push(entity);
+                 		console.log("new " + plotThis_info.length);
+                 		oldLocations_info.push(entity);
+                 	}
+                 }
+         	drop_info();
+          	console.log("info response" + infoResponse);
+         }
+         function get_server_response()
+         {
+         
+         	var response = "zz ";
+         		$.get('http://107.170.96.216:8888/upload', function(data) {
+         			$('.result').html(data);	
+         			serverResponse =data;
+         		}, "text");
+         }
+         
+         function post_remove_object_server(name)
+         {
+
+    		$.post('http://107.170.96.216:8888/remove',
+    			{
+      				n:name
+    			},
+    			function(data,status){
+      			//alert("Data: " + data + "\nStatus: " + status);
+      			console.log("removed object name " + name);
+   				} );
+         } 
+          function post_remove_info_object_server(name)
+         {
+
+    		$.post('http://107.170.96.216:8888/remove_info',
+    			{
+      				n:name
+    			},
+    			function(data,status){
+      			//alert("Data: " + data + "\nStatus: " + status);
+      			console.log("removed info object name " + name);
+   				} );
+         } 
+         //get info for the info messages
+          function get_server_response_info()
+         {
+         
+         	var response = "zz ";
+         		$.get('http://107.170.96.216:8888/getinfo', function(data) {
+         			$('.result').html(data);	
+         			infoResponse = data;
+         			get_info_from_server();
+         		}, "text");
+         }     
+         //***************************************
+         var centr = new google.maps.LatLng(43.7740601, -79.5052628);
+         var map;
+         var infowindow; //global declaration for single instance of infowindow
+         function init() {
+             var mapOptions = {
+                 zoom: 17,
+                 mapTypeId: google.maps.MapTypeId.ROADMAP,
+                 center: centr
+             };
+             map = new google.maps.Map(document.getElementById('map_canvas'),
+             mapOptions);
+             infowindow = new google.maps.InfoWindow();
+             drop();
+         }
+         
+         function drop() {
+             for (var i = 0; i < plotThis.length; i++) {
+                 var entity = plotThis[i];
+                 if(!contains(doNotPlotThis, entity)){
+                 var myLatLng = new google.maps.LatLng(entity.latitude, entity.longitude);
+                 var mark = new google.maps.Marker({
+                     position: myLatLng,
+                 //    map: map,
+                     animation: google.maps.Animation.BOUNCE,
+                     title:entity.name
+                 });
+                 var text = "<p>Name: " 
+                 + entity.name +
+                 "</p><p>Emergency Needs: " 
+                 + entity.health + 
+                 "</p><p>Phone Number: " 
+                 + entity.phoneNumber + 
+                 "</p>";
+             iWindow(mark, text);
+             mark.setMap(map);
+            }
+            }
+         }
+             function drop_info() {
+             for (var i = 0; i < plotThis_info.length; i++) {
+                 var entity = plotThis_info[i];
+                 if(!contains(doNotPlotThis_info, entity)){
+                 var myLatLng = new google.maps.LatLng(entity.latitude, entity.longitude);
+                 var mark = new google.maps.Marker({
+                     position: myLatLng,
+                 //    map: map,
+                     animation: google.maps.Animation.BOUNCE,
+                     title:entity.name
+                 });
+                 var text = "<p>Name: " 
+                 + entity.name +
+                 "</p><p>Message: " 
+                 + entity.info + 
+                 "</p><p>Phone Number: " 
+                 + entity.phoneNumber + 
+                 "</p>";
+             iWindow_info(mark, text);
+             mark.setMap(map);
+            }
+            }
+         }
+          function iWindow_info(marker, title) {
+             google.maps.event.addListener(marker, 'click', function () {
+                 infowindow.setContent(title);
+                 infowindow.open(map, marker);
+             });
+             google.maps.event.addListener(marker,'dblclick',function() {
+  				var markerTitle = marker.getTitle();
+  				//fix this one
+  				post_remove_info_object_server(markerTitle);
+  				marker.setMap(null);
+  				removeObject(plotThis_info, markerTitle);
+  				doNotPlotThis_info.push(markerTitle);
+  			});
+  			google.maps.event.addListener(marker,'rightclick',function() {
+  				marker.setAnimation(null);
+  			});
+         }
+         
+         function iWindow(marker, title) {
+             google.maps.event.addListener(marker, 'click', function () {
+                 infowindow.setContent(title);
+                 infowindow.open(map, marker);
+             });
+             google.maps.event.addListener(marker,'dblclick',function() {
+  				var markerTitle = marker.getTitle();
+  				post_remove_object_server(markerTitle);
+  				marker.setMap(null);
+  				removeObject(plotThis, markerTitle);
+  				doNotPlotThis.push(markerTitle);
+  			});
+  			google.maps.event.addListener(marker,'rightclick',function() {
+  				marker.setAnimation(null);
+  			});
+         }
+         window.onload = init;
+         //***************************************
+    function contains(a, obj) {
+    for (var i = 0; i < a.length; i++) {
+        if (JSON.stringify(a[i]) == JSON.stringify(obj)) {
+            return true;
+        }
+    }
+    return false;
+}
+  function removeObject(a, obj) {
+    for (var i = 0; i < a.length; i++) {
+        if (JSON.stringify(a[i].name) == JSON.stringify(obj)) {
+        a.splice(i,1);
+        }
+    }
+}
+      </script>
+      <div id="map_canvas" style="width: 100%; height: 100%;"></div>
+   </body>
+</html>

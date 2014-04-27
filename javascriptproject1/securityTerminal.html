@@ -1,0 +1,114 @@
+<html>
+   <body onload="init()">
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+      <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+      <script>
+       	var centr = new google.maps.LatLng(43.7740601, -79.5052628);
+    	var map;
+        var infowindow; //global declaration for single instance of infowindow
+        var dataArray=[];
+        var pinColor = "f01502";
+         var pinColor_blue ="0000ff";
+    	var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor_blue,
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0,0),
+        new google.maps.Point(10, 34));
+   	 	var pinShadow = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_shadow",
+        new google.maps.Size(40, 37),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(12, 35));
+        
+        function init() {
+             var mapOptions = {
+                 zoom: 17,
+                 mapTypeId: google.maps.MapTypeId.ROADMAP,
+                 center: centr
+             };
+             map = new google.maps.Map(document.getElementById('map_canvas'),
+             mapOptions);
+             infowindow = new google.maps.InfoWindow();
+         }
+        function drop_alert_marker(infoResponse) {
+        	 var dataArray = JSON.parse(infoResponse);
+        	 console.log("dataArray length " + dataArray.length);
+        	  console.log("infoResponse " + infoResponse);
+             for (var i = 0; i < dataArray.length; i++) {
+                 var entity = dataArray[i];
+                 var myLatLng = new google.maps.LatLng(entity.latitude, entity.longitude);
+                 var mark = new google.maps.Marker({
+                     position: myLatLng,
+                     animation: google.maps.Animation.BOUNCE,
+                     title:entity.name,
+                     icon: pinImage,
+                	 shadow: pinShadow
+                 });
+                 var text = "<p>Name: " 
+                 + entity.name +
+                 "</p><p>Emergency Needs: " 
+                 + entity.health + 
+                 "</p><p>Phone Number: " 
+                 + entity.phoneNumber + 
+                 "</p>";
+             iWindow(mark, text);
+             mark.setMap(map);
+            }
+         }
+         function drop_info_marker(infoResponse) {
+        	 var dataArray = JSON.parse(infoResponse);
+        	 console.log("dataArray length " + dataArray.length);
+        	  console.log("infoResponse " + infoResponse);
+             for (var i = 0; i < dataArray.length; i++) {
+                 var entity = dataArray[i];
+                 var myLatLng = new google.maps.LatLng(entity.latitude, entity.longitude);
+                 var mark = new google.maps.Marker({
+                     position: myLatLng,
+                     animation: google.maps.Animation.BOUNCE,
+                     title:entity.name
+                 });
+                 var text = "<p>Name: " 
+                 + entity.name +
+                 "</p><p>Message: " 
+                 + entity.info + 
+                 "</p><p>Phone Number: " 
+                 + entity.phoneNumber + 
+                 "</p>";
+             iWindow(mark, text);
+             mark.setMap(map);
+            }
+         }
+         function iWindow(marker, title) {
+             google.maps.event.addListener(marker, 'mouseover', function () {
+                 infowindow.setContent(title);
+                 infowindow.open(map, marker);
+                 marker.setAnimation(null);
+             });
+             google.maps.event.addListener(marker,'dblclick',function() {
+  				var markerTitle = marker.getTitle();
+  				marker.setMap(null);
+  			});
+  			google.maps.event.addListener(marker,'rightclick',function() {
+  				marker.setAnimation(null);
+  			});
+         }
+          function get_server_response_for_alert()
+         {
+         		$.get('http://107.170.96.216:8888/upload', function(data) {
+         			$('.result').html(data);	
+         			drop_alert_marker(data);
+         		}, "text");
+         }
+         function get_server_response_for_info()
+         {
+         
+         	var response = "zz ";
+         		$.get('http://107.170.96.216:8888/getinfo', function(data) {
+         			$('.result').html(data);	
+         			drop_info_marker(data);
+         		}, "text");
+         }   
+        setInterval(function(){ get_server_response_for_alert()},1000);
+        setInterval(function(){ get_server_response_for_info()},1000);
+      </script>
+	<div id="map_canvas" style="width: 100%; height: 100%;"></div>
+	</body>
+</html>
