@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+img
+{
+position:absolute;
+left:200px;
+top:0px;
+z-index:-1;
+}
+</style>
+</head>
+
+<body onload="init()">
+<!--image-->
+<img src="safetyFirst.jpg" width="75" height="105" />
+<!--blue patch-->
+<div style="opacity:0.3;position:absolute;left:35px;top:50px;width:500px;height:85px;background-color:#40B3DF"></div>
+<!--big border-->
+<div style="font-family:verdana;padding:0px;border-radius:20px;border:5px solid #EE872A;">
+<!--green patch-->
+<div style="opacity:0.3;position:absolute;left:120px;width:200px;height:120px;background-color:#8AC007"></div>
+
+<h3>SafetyFirst</h3>
+
+<div style="letter-spacing:12px;">Analytics Terminal</div>
+
+<div style="color:#40B3DF;">Check for Alerts 
+<span style="background-color:#B4009E;color:#ffffff;">Information Alerts</span>
+</div>
+<div style="color:#000000;">and more...</div>
+</div>
+
+<div style="position:relative;left:0px;top:50px;background-color:#8AC007">
+<form id="frm1" action="TEST.html">
+Start Date: <input type="text" name="sdate"><br>
+Start Time <input type="text" name="stime"><br>
+End Date: <input type="text" name="edate"><br>
+End Time: <input type="text" name="etime"><br><br>
+<input type="button" onclick="myFunction()" value="Submit form">
+</form>
+</div>
+
+<script>
+function myFunction()
+{
+document.getElementById("frm1").submit();
+}
+</script>
+
+
+<button onclick="get_server_response();" style="position:relative;left:35px;top:50px;width:100px;height:35px;">Try it</button>
+
+
+
+</body>
+</html>
+

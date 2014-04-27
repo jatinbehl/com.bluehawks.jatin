@@ -22,15 +22,47 @@ var alertSchema = new mongoose.Schema({
 	});
 
 var Alert = mongoose.model('Alert', alertSchema);
+var infoSchema = new mongoose.Schema({
+	name : {
+		type : String
+	},
+	latitude : Number,
+	longitude : Number,
+	phoneNumber : {
+		type : String
+	}
+	 , date: {
+	 type: Date, default: Date.now
+	 }
+	 ,info:{
+	 type: String, default: "Empty"
+	 }
+	,
+	tag : {
+		type : String
+	}
+});
 
+var Info = mongoose.model('Info', infoSchema);
 Alert.remove({}, function (err) {
 	  if (err) {
 		  mongoose.connection.close();
 		  return console.error(err);
 	  }
 	  else{
-	  console.dir('cleaned');
+	  console.dir('cleaned alerts');
+	  
+	  }
+	});
+	Info.remove({}, function (err) {
+	  if (err) {
+		  mongoose.connection.close();
+		  return console.error(err);
+	  }
+	  else{
+	  console.dir('cleaned info');
 	  mongoose.connection.close();
 	  }
 	});
+
 

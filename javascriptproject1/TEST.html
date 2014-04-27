@@ -1,14 +1,15 @@
+
 <html>
    <body onload="initialize()">
       <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
       <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
       <script>
-         var serverResponse = "no response yet";
+         var serverResponse = {a:"no response yet"};
          var locations=[{"latitude":"43.7740","longitude":"-79.5052","name":"jatin","age":"jb@gamil.com"}];
          var oldLocations=[];
          
          //query the server for the latest data 
-         setInterval(function(){ get_data_from_server()},1000);
+        setInterval(function(){ get_server_response ()},1000);
          
          //clean the do not plot this array
          setInterval(function(){ clean_do_not_plot_this()},5000);
@@ -26,9 +27,34 @@
          doNotPlotThis=[];
          }
                   
-         function get_data_from_server()
+       
+         function get_server_response()
          {
-         	var texta = get_server_response();
+         
+         	var response = "zz ";
+         		$.get('http://107.170.96.216:8888/getinfo', function(data) {
+         			$('.result').html(data);	
+         			serverResponse = data;
+         			get_data_from_server();
+         		}, "text");
+         }
+         
+         function post_remove_object_server(name)
+         {
+
+    		$.post('http://107.170.96.216:8888/removeinfo',
+    			{
+      				n:name
+    			},
+    			function(data,status){
+      			//alert("Data: " + data + "\nStatus: " + status);
+      			console.log("removed object name " + name);
+   				} );
+         }      
+         
+           function get_data_from_server()
+         {
+         	//var texta = get_server_response();
          	locations = JSON.parse(serverResponse);
          	plotThis=[];
          	console.log("initial " + plotThis.length);
@@ -44,33 +70,12 @@
           	console.log("" + serverResponse);
          }
          
-         function get_server_response()
-         {
-         
-         	var response = "zz ";
-         		$.get('http://107.170.96.216:8888/upload', function(data) {
-         			$('.result').html(data);	
-         			serverResponse =data;
-         		}, "text");
-         }
-         
-         function post_remove_object_server(name)
-         {
-
-    		$.post('http://107.170.96.216:8888/remove',
-    			{
-      				n:name
-    			},
-    			function(data,status){
-      			//alert("Data: " + data + "\nStatus: " + status);
-      			console.log("removed object name " + name);
-   				} );
-         }      
          //***************************************
          var centr = new google.maps.LatLng(43.7740601, -79.5052628);
          var map;
          var infowindow; //global declaration for single instance of infowindow
          function init() {
+         	get_server_response();
              var mapOptions = {
                  zoom: 17,
                  mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -80,6 +85,7 @@
              mapOptions);
              infowindow = new google.maps.InfoWindow();
              drop();
+            get_data_from_server();
          }
          
          function drop() {
@@ -90,13 +96,13 @@
                  var mark = new google.maps.Marker({
                      position: myLatLng,
                  //    map: map,
-                     animation: google.maps.Animation.BOUNCE,
+                     animation: google.maps.Animation.DROP,
                      title:entity.name
                  });
                  var text = "<p>Name: " 
                  + entity.name +
-                 "</p><p>Emergency Needs: " 
-                 + entity.health + 
+                 "</p><p>Message: " 
+                 + entity.info + 
                  "</p><p>Phone Number: " 
                  + entity.phoneNumber + 
                  "</p>";
@@ -118,7 +124,7 @@
   				removeObject(plotThis, markerTitle);
   				doNotPlotThis.push(markerTitle);
   			});
-  			google.maps.event.addListener(marker,'rightclick',function() {
+			google.maps.event.addListener(marker,'rightclick',function() {
   				marker.setAnimation(null);
   			});
          }

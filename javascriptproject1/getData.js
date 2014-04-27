@@ -22,6 +22,29 @@ var alertSchema = new mongoose.Schema({
 	});
 
 var Alert = mongoose.model('Alert', alertSchema);
+var infoSchema = new mongoose.Schema({
+	name : {
+		type : String
+	},
+	latitude : Number,
+	longitude : Number,
+	phoneNumber : {
+		type : String
+	}
+	 , date: {
+	 type: Date, default: Date.now
+	 }
+	 ,info:{
+	 type: String, default: "Empty"
+	 }
+	,
+	tag : {
+		type : String
+	}
+});
+
+var Info = mongoose.model('Info', infoSchema);
+
 var something;
 
 //Alert.find({}, function(err, something) {
@@ -39,7 +62,7 @@ var something;
 //	  mongoose.connection.close();
 //	});
 
-Alert.find({}, function(err, something) {
+Info.find({tag:'info'}, function(err, something) {
 	  if (err) {
 		  mongoose.connection.close();
 		  return console.error(err);
@@ -50,4 +73,5 @@ Alert.find({}, function(err, something) {
 		  console.dir(""+JSON.stringify(something));
 	  }
 	});
+
 
